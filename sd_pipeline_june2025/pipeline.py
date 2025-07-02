@@ -1,20 +1,23 @@
 import os.path
 from datetime import timezone
 
-from openhexa.sdk import current_run, pipeline, workspace
+from openhexa.sdk import current_run, pipeline, workspace, parameter
 from datetime import datetime
 import papermill as pm
 
 
 @pipeline("with-papermill", timeout=720)  # 12 minutes (en secondes)
-def with_papermill():
+@parameter("user_name", name="User name", type=str, default="Stephane", help="Nom de l'utilisateur")
+@parameter("data_element_list", name="Data Element List", type=str, choices=["DE_list_1", "DE_list_2"], default="DE_list_1", help="Choix de la liste des Data Elements")
+
+def with_papermill(user_name,data_element_list):
     current_run.log_info("Pipeline started.")
-    run_notebook()
+    run_notebook(user_name,data_element_list)
     current_run.log_info("Pipeline finished.")
 
 
 @with_papermill.task
-def run_notebook():
+def run_notebook(user_name,data_element_list):
     current_run.log_info("Launching the notebook...")
     
     input_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "notebook_extraction_dhis2.ipynb")
@@ -27,9 +30,10 @@ def run_notebook():
         pm.execute_notebook(
             input_path=input_path,
             output_path=output_path,
-            parameters={"param_1": "value_1", "param_2": False},
-            # The next parameter is important - otherwise papermill will perform a lot of small append write operations,
-            # which can be very slow when using object storage in the cloud
+            parameters={
+                "user_name": user_name,
+                "data_element_list": data_element_list
+                },
             request_save_on_cell_execute=False,
             progress_bar=False
         )
