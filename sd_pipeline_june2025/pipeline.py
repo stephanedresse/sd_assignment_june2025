@@ -6,7 +6,7 @@ from datetime import datetime
 import papermill as pm
 
 
-@pipeline("with-papermill", timeout=12 *60) #12 minutes
+@pipeline("with-papermill", timeout=720) #12 minutes (en secondes)
 def with_papermill():
     run_notebook()
 
