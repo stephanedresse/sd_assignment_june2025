@@ -13,7 +13,7 @@ import papermill as pm
 def with_papermill(user_name,data_element_list):
     current_run.log_info("Pipeline started.")
     run_notebook(user_name,data_element_list)
-    current_run.log_info("Pipeline finished.")
+    
 
 
 @with_papermill.task
@@ -25,7 +25,9 @@ def run_notebook(user_name,data_element_list):
     
     output_path = f"{workspace.files_path}/simple_notebook_output_{datetime.now(timezone.utc).isoformat()}.ipynb"
     current_run.log_debug(f"Output notebook path: {output_path}")
-    
+
+    current_run.log_info(f"Les paramètres choisis sont : {user_name}, {data_element_list}")
+
     try:
         pm.execute_notebook(
             input_path=input_path,
@@ -56,7 +58,7 @@ def run_notebook(user_name,data_element_list):
         current_run.log_warning(f"CSV output file not found at expected path: {csv_output_path}")
     
     current_run.log_info("Task done!")
-
+    current_run.log_info("Pipeline finished.")
 
 if __name__ == "__main__":
     with_papermill()
