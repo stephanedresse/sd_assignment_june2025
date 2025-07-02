@@ -6,10 +6,9 @@ from datetime import datetime
 import papermill as pm
 
 
-@pipeline("with-papermill")
+@pipeline("with-papermill", timeout=12 *60) #12 minutes
 def with_papermill():
     run_notebook()
-
 
 @with_papermill.task
 def run_notebook():
@@ -25,8 +24,18 @@ def run_notebook():
         request_save_on_cell_execute=False,
         progress_bar=False
     )
-    current_run.log_info("Done!")
+    current_run.add_file_output(output_path)
+    
+    # On ajoute aussi le CSV généré par le notebook comme output pipeline
+    csv_output_path = os.path.join(workspace.files_path, "agg_df.csv")
+    if os.path.exists(csv_output_path):
+        current_run.log_info(f"Adding pipeline output file: {csv_output_path}")
+        current_run.add_file_output(csv_output_path)
+    else:
+        current_run.log_info(f"CSV output file not found at expected path: {csv_output_path}")
+    
 
+    current_run.log_info("Done!")
 
 if __name__ == "__main__":
     with_papermill()
