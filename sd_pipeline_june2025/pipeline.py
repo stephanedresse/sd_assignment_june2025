@@ -60,11 +60,13 @@ def run_notebook(user_name, politesse_lvl, data_element_list):
         current_run.log_error(f"Failed to execute notebook: {e}")
         raise
     
-    current_run.add_file_output(output_path)
-    current_run.log_info(f"Added notebook output file to pipeline outputs: {output_path}")
-    
+
+
     # On ajoute aussi le CSV généré par le notebook comme output pipeline
-    csv_output_path = os.path.join(workspace.files_path, "agg_df.csv")
+    date_today = datetime.now().strftime("%Y-%m-%d")
+    csv_filename = f"agg_df_{date_today}.csv"
+    csv_output_path = os.path.join(workspace.files_path, csv_filename)
+
     current_run.log_debug(f"Looking for CSV output at: {csv_output_path}")
     
     if os.path.exists(csv_output_path):
